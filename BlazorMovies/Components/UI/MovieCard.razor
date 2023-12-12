@@ -1,0 +1,58 @@
+@inject IJSRuntime JS
+
+
+@if(Movie is not null){
+    <div class="card w-full h-full glass" @ref="_posterCardElement">
+        @if (string.IsNullOrEmpty(Movie.PosterPath))
+        {
+            <figure><img src="../images/PosterPlaceHolder.png" alt="Movie Poster" /></figure>
+        }
+        else
+        {
+            <figure><img src="@($"https://image.tmdb.org/t/p/w500/{Movie.PosterPath}")" alt="Movie Poster" /></figure>
+        }
+        <div class="card-body">
+            <h2 class="card-title">@Movie.Title</h2>
+            <p>@DateTime.Parse(Movie.ReleaseDate).ToString("MMMM dd, yyyy")</p>
+            <div class="card-actions justify-end">
+                <a class="btn btn-primary" href="/movie/@Movie.Id">Details</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div>
+        <div class="flex flex-col gap-4 w-full">
+            <div class="skeleton h-32 w-full"></div>
+            <div class="skeleton h-4 w-28"></div>
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-4 w-full"></div>
+            <div class="skeleton h-10 w-1/2 float-right"></div>
+        </div>
+    </div>
+}
+
+
+@code{
+
+    [Parameter]
+    public PopularMovie? Movie {get; set;}
+
+    private ElementReference ? _posterCardElement;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender){
+        if(firstRender){
+            await JS.InvokeVoidAsync("VanillaTilt.init", _posterCardElement, new
+            {
+                max= 15,
+                speed= 400,
+            });
+        }
+    }
+
+    public void Dispose()
+    {
+        JS.InvokeVoidAsync("VanillaTilt.destroy", _posterCardElement);
+    }
+}

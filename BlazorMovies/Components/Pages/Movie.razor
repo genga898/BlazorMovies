@@ -1,0 +1,81 @@
+﻿@page "/movie/{id:int}"
+@inject TMDBClient TMDB
+
+@if(movieDetails is null)
+{
+    <p><em>Loading...</em></p>
+}
+else{
+    <PageTitle>@movieDetails.Title</PageTitle>
+
+    <!--banner-->
+    <div class="hero-bg bg-blue-800 glass" style="@($"--banner-img: url(https://image.tmdb.org/t/p/original{movieDetails.BackdropPath})")">
+        <div class="hero-container">
+            <div class="container-xl flex flex-col md:flex-row">
+                <!-- Title content goes here -->
+                <div class="flex-grow flex items-center justify-center md:justify-end">
+                    <div class="title-container text-center md:text-end p-2">
+                        <h1 class="text-5xl">@movieDetails.Title</h1>
+                        <h2 class="text-lg">@movieDetails.Tagline</h2>
+                        @if(DateTime.TryParse(movieDetails.ReleaseDate, out DateTime releaseDate)){
+                            <span class="m-1 p-3 badge badge-neutral">@releaseDate.ToString("MMMM dd yyyy")</span>
+                        }
+                        @{
+                            var runtime = $"{movieDetails.Runtime / 60}h {movieDetails.Runtime % 60}m";
+                            var rating = (movieDetails.VoteAverage * 10).ToString("F1");
+                        }
+                        <span class="m-1 p-3 badge badge-primary">@runtime</span>
+                        <span class="m-1 p-3 badge badge-success">@rating%</span>
+                        <div class="movie-links">
+                            <div class="flex justify-center md:justify-end gap-2 p-3">
+                                @if(!string.IsNullOrWhiteSpace(movieDetails.Homepage)){
+                                    <a href="@movieDetails.Homepage" target="_blank" class="btn btn-primary rounded-full">Website</a>
+                                }
+                                @if(!string.IsNullOrWhiteSpace(movieDetails.ImdbId)){
+                                    <a href="@($"https://www.imdb.com/title/{movieDetails.ImdbId}")" target="_blank" class="btn btn-warning rounded-full ml-2">IMDB</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-last md:order-first flex justify-center">
+                    <div class="poster-container" style="transform:translateY(50%)">
+                        @if(string.IsNullOrEmpty(movieDetails.PosterPath)){
+                            <img src="images/PosterPlaceHolder.png" alt="Movie Poster" class="w-100 h-100 object-cover rounded-lg shadow-lg" />
+                        }
+                        else
+                        {
+                            <img src="@($"https://image.tmdb.org/t/p/w300{movieDetails.PosterPath}")" alt="@movieDetails.Title" class="rounded-lg" />                      
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-xl p-4 text-justify">
+        <div class="overview flex flex-col">
+            <p>@movieDetails.Overview</p>
+        </div>
+        <div>
+            @if(movieDetails.SpokenLanguages.Any()){
+                <div class="flex items-center">
+                    <h3 class="text-lg">Languages: &nbsp;</h3> @string.Join(", ", movieDetails.SpokenLanguages.Select(l => l.EnglishName))
+                </div>
+            }
+        </div>
+
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private MovieDetails? movieDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        movieDetails = await TMDB.GetMovieDetailsAsync(Id);
+    }
+}

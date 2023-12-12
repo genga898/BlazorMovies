@@ -1,0 +1,38 @@
+﻿<div class="flex items-center justify-center gap-3 mt-3">
+    <button class="btn btn-primary rounded-full" disabled="@(CurrentPage <=1)" @onclick="PreviousPage">Previous</button>
+    <span>Page @CurrentPage of @TotalPages</span>
+    <button class="btn btn-primary rounded-full" disabled="@(CurrentPage >= TotalPages)" @onclick="NextPage">Next</button>
+</div>
+
+
+
+@code{
+    [Parameter]
+    [EditorRequired]
+    public int CurrentPage { get; set; }
+
+    [Parameter]
+    [EditorRequired]
+    public int TotalPages { get; set; }
+
+    [Parameter]
+    public EventCallback<int> CurrentPageChanged { get; set; }
+
+    private async Task PreviousPage()
+    {
+        if (CurrentPage > 1)
+        {
+            CurrentPage--;
+            await CurrentPageChanged.InvokeAsync(CurrentPage);
+        }
+    }
+
+    private async Task NextPage()
+    {
+        if (CurrentPage < TotalPages)
+        {
+            CurrentPage++;
+            await CurrentPageChanged.InvokeAsync(CurrentPage);
+        }
+    }
+}
