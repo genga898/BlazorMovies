@@ -56,7 +56,7 @@
         movies = await TMDB.GetPopularMoviesAsync(Page);
     }
 
-    private async Task GetPage(int page)
+    private void GetPage(int page)
     {
        string url = NavManager.GetUriWithQueryParameter("page", page);
        NavManager.NavigateTo(url);
